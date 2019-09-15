@@ -1,0 +1,151 @@
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.2.1
+    restart: always
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+      ZOOKEEPER_SERVERS: "zookeeper:22888:23888"
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka
+    depends_on:
+      - zookeeper
+    #hostname: kafka
+    ports:
+      - 9092:9092
+      - 9999:9999
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: kafka
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9999"
+  schema-registry:
+    image: confluentinc/cp-schema-registry
+    ports:
+     - 8181:8181
+     - 8081:8081
+    environment:
+     - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181
+     - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+     - SCHEMA_REGISTRY_LISTENERS=http://schema-registry:8081
+    links:
+     - zookeeper
+     - kafka
+  kafka-rest:
+    image: confluentinc/cp-kafka-rest
+    ports:
+      - 8082:8082
+    links:
+      - zookeeper
+      - kafka
+      - schema-registry
+    environment:
+      - KAFKA_REST_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_REST_LISTENERS=http://kafka-rest:8082
+      - KAFKA_REST_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - KAFKA_REST_HOST_NAME=kafka-rest
+  connect:
+    image: dbz-connect-postgres
+    ports:
+     - 8083:8083
+     - 8084:8084
+     - 9991:9991
+    links:
+     - kafka
+     - schema-registry
+    environment:
+     - BOOTSTRAP_SERVERS=kafka:9092
+     - GROUP_ID=1
+     - CONFIG_STORAGE_TOPIC=my_connect_configs
+     - OFFSET_STORAGE_TOPIC=my_connect_offsets
+     - KEY_CONVERTER=io.confluent.connect.avro.AvroConverter
+     - VALUE_CONVERTER=io.confluent.connect.avro.AvroConverter
+     - INTERNAL_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+     - INTERNAL_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+     - CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+     - CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+     - JMXPORT=9991
+     - JMXHOST=${JMX_HOST_IP}
+  kafka-connect-ui:
+    image: landoop/kafka-connect-ui
+    ports:
+      - 8000:8000
+    links:
+      - connect
+    environment:
+      - CONNECT_URL=http://connect:8083
+  kafka-topic-ui:
+    image: landoop/kafka-topics-ui
+    ports:
+      - 8001:8000
+    links:
+      - kafka-rest
+    environment:
+      - KAFKA_REST_PROXY_URL=http://kafka-rest:8082
+      - PROXY=true
+  schema-registry-ui:
+    image: landoop/schema-registry-ui
+    ports:
+      - 8002:8000
+    links:
+      - schema-registry
+    environment:
+      - SCHEMAREGISTRY_URL=http://schema-registry:8081
+      - PROXY=true
+  kafka-jmx-exporter:
+    build: ./kafka-jmx-exporter
+    ports:
+      - 8080:8080
+    links:
+      - kafka
+    environment:
+      - JMX_PORT=9999
+      - JMX_HOST=${JMX_HOST_IP}
+      - HTTP_PORT=8080
+      - JMX_EXPORTER_CONFIG_FILE=kafka.yml
+  connect-jmx-exporter:
+    build: ./connect-jmx-exporter
+    ports:
+      - 8085:8085
+    links:
+      - connect
+    environment:
+      - JMX_PORT=9991
+      - JMX_HOST=${JMX_HOST_IP}
+      - HTTP_PORT=8085
+      - JMX_EXPORTER_CONFIG_FILE=connect.yml
+  prometheus:
+    ports:
+      - 9090:9090/tcp
+    image: prom/prometheus:0.18.0
+    volumes:
+      - ./mount/prometheus:/etc/prometheus
+    links:
+      - kafka-jmx-exporter
+  grafana:
+    image: grafana/grafana:3.0.1
+    ports:
+      - 3000:3000/tcp
+    links:
+      - prometheus
+    volumes:
+      - "graf-db:/var/lib/grafana"
+  graf-db:
+    command:
+      - cat
+    image: infinityworks/graf-db:08
+    links:
+      - prometheus
+    volumes:
+      - "graf-db:/var/lib/grafana/"
+volumes:
+  graf-db:
