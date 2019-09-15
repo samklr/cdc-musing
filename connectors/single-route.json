@@ -1,5 +1,5 @@
 {
-    "name": "blocket-connector-routed",
+    "name": "pgwal-connector-routed",
     "type" : "source",
     "config": {
         "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
@@ -9,10 +9,9 @@
         "database.user": "postgres",
         "database.password": "postgres",
         "database.dbname" : "postgres",
-        "database.server.name": "blocketdb",
-        "database.whitelist": "blocket",
+        "database.server.name": "main_db",
         "database.history.kafka.bootstrap.servers": "kafka:9092",
-        "database.history.kafka.topic": "schema-changes.blocketdb" ,
+        "database.history.kafka.topic": "schema-changes.main_db" ,
         "transforms": "route",
         "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
         "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",

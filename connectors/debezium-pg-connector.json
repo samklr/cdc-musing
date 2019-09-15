@@ -1,5 +1,5 @@
 {
-    "name": "blocket-connector",
+    "name": "pg-wal-connector",
     "config": {
         "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
         "tasks.max": "1",

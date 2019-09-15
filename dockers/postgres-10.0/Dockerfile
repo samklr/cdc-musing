@@ -44,12 +44,12 @@ RUN git clone https://github.com/eulerto/wal2json -b master --single-branch \
 COPY postgresql.conf.sample /usr/share/postgresql/postgresql.conf.sample
 
 #copy sql schemas and data sample to /opt/
-COPY sql/stores_schema.sql /opt/
-COPY sql/stores_d.sql /opt/
-COPY sql/inventory.sql /opt/
-COPY sql/blocket_stores_light.sql /opt/
-COPY sql/blocket_stores_light_update.sql /opt/
-COPY sql/stores_d2.sql /opt/
+# COPY sql/stores_schema.sql /opt/
+# COPY sql/stores_d.sql /opt/
+# COPY sql/inventory.sql /opt/
+# COPY sql/stores_light.sql /opt/
+# COPY sql/stores_light_update.sql /opt/
+# COPY sql/d2.sql /opt/
 
 # Copy the script which will initialize the replication permissions
 COPY /docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
