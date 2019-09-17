@@ -1,19 +1,19 @@
 DROP TABLE IF EXISTS movies;
 
-CREATE TABLE movies(
+CREATE TABLE movies_raw(
   id                   INTEGER NOT NULL PRIMARY KEY,
   title                VARCHAR(100) NOT NULL,
   release_year         INTEGER NOT NULL,
   unknown_1            INTEGER,
   country              VARCHAR(50),
   unknown_2            INTEGER,
-  genres               VARCHAR(50),
-  actors               VARCHAR(1000),
-  director             VARCHAR(1000),
-  composers            VARCHAR(200),
-  screenwriters        VARCHAR(500),
-  cinematographers     VARCHAR(200),
-  production_companies VARCHAR(500)
+  genres               text,
+  actors               text,
+  director             text),
+  composers            text,
+  screenwriters        text,
+  cinematographers     text,
+  production_companies text
 );
 
 INSERT INTO movies(id,title,release_year,unknown_1,country,unknown_2,genres,actors,director,composers,screenwriters,cinematographers,production_companies) VALUES (1,'Once Upon a Time in the West',1968,165,'Italy',18962,'Western','Claudia Cardinale|Charles Bronson|Henry Fonda|Gabriele Ferzetti|Frank Wolff|Al Mulock|Jason Robards|Woody Strode|Jack Elam|Lionel Stander|Paolo Stoppa|Keenan Wynn|Aldo Sambrell','Sergio Leone','Ennio Morricone','Sergio Leone|Sergio Donati|Dario Argento|Bernardo Bertolucci','Tonino Delli Colli','Paramount Pictures');

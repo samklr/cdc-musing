@@ -15,7 +15,6 @@ services:
     image: confluentinc/cp-kafka
     depends_on:
       - zookeeper
-    #hostname: kafka
     ports:
       - 9092:9092
       - 9999:9999
@@ -53,27 +52,6 @@ services:
       - KAFKA_REST_LISTENERS=http://kafka-rest:8082
       - KAFKA_REST_SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - KAFKA_REST_HOST_NAME=kafka-rest
-  # cp-connect:
-  #   image: confluentinc/cp-kafka-connect
-  #   ports:
-  #     - 8084:8083
-  #     - 9992:9991
-  #   links:
-  #     - kafka
-  #     - schema-registry
-  #   environment:
-  #     - BOOTSTRAP_SERVERS=kafka:9092
-  #     - GROUP_ID=1
-  #     - CONFIG_STORAGE_TOPIC=my_connect_2_configs
-  #     - OFFSET_STORAGE_TOPIC=my_connect_2_offsets
-  #     - KEY_CONVERTER=io.confluent.connect.avro.AvroConverter
-  #     - VALUE_CONVERTER=io.confluent.connect.avro.AvroConverter
-  #     - INTERNAL_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
-  #     - INTERNAL_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
-  #     - CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
-  #     - CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
-  #     - JMXPORT=9991
-  #     - JMXHOST=${JMX_HOST_IP}
   dbz-connect:
     build: ./debezium-connect
     ports:
@@ -101,6 +79,7 @@ services:
       - 8000:8000
     links:
       - dbz-connect
+      - kafka-rest
     environment:
       - CONNECT_URL=http://connect:8083
   kafka-topic-ui:

@@ -1,17 +1,4 @@
-CREATE SCHEMA fakeblocket;
---SET search_path TO blocketstore;
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = off;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
-SET backslash_quote = 'on';
-
-SET search_path = blocket, public, pg_catalog;
+DROP TABLE fakestore;
 
 CREATE TABLE fakestore (
     store_id integer NOT NULL PRIMARY KEY,
