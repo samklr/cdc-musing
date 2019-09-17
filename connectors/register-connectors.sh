@@ -1,3 +1,7 @@
 #! /bin/bash
 
-http POST http://localhost:8083/connectors < debezium-pg-connector.json
+export KAFKA_CONNECT_URL=localhost
+export KAFKA_CONNECT_PORT=8083
+
+echo 'Registering Debezium Connector'
+http POST http://$KAFKA_CONNECT_URL:$KAFKA_CONNECT_PORT/connectors < debezium-pg-connector.json

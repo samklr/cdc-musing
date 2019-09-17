@@ -3,14 +3,18 @@
     "config": {
         "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
         "tasks.max": "1",
-        "database.hostname": "postgres",
+        "database.hostname": "trips-nyc-db.c5go1dblmbis.eu-west-1.rds.amazonaws.com",
         "database.port": "5432",
         "database.user": "postgres",
         "database.password": "postgres",
+        "plugin.name": "wal2json",
+        "slot.name": "wal2json_rds",
+        "snapshot.mode": "always",
         "database.dbname" : "postgres",
+        "table.whitelist": "public.trips_raw",
         "database.server.name": "main_db",
         "database.history.kafka.bootstrap.servers": "kafka:9092",
-        "database.history.kafka.topic": "schema-changes.pg-stores",
+        "database.history.kafka.topic": "db-changes.pg-citibikes",
         "topic.selection.strategy" : "topic_per_schema"
     }
 }

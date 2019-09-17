@@ -1,16 +1,12 @@
-FROM debezium/connect-base:0.9
-# https://hub.docker.com/r/debezium/connect/
+FROM confluentinc/cp-kafka-connect
+#FROM debezium/connect-base:0.9
 
-MAINTAINER Debezium Community
+MAINTAINER samklr
 
 ENV DEBEZIUM_VERSION=0.9.5 \
-    KAFKA_CONNECT_PLUGINS_DIR=/kafka/connect \
-    MAVEN_CENTRAL="https://repo1.maven.org/maven2" 
-#
-# Download connectors, verify the contents,
-# and then install into the `$KAFKA_CONNECT_PLUGINS_DIR/debezium` directory...
-#
+    KAFKA_CONNECT_PLUGINS_DIR=/usr/share/java \
+    DBZ_URL=https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/0.9.5.Final/debezium-connector-postgres-0.9.5.Final-plugin.tar.gz
 
-RUN curl https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/0.9.5.Final/debezium-connector-postgres-0.9.5.Final-plugin.tar.gz -o /tmp/plugin.tar.gz
+RUN curl $DBZ_URL -o /tmp/debezium-plugin.tar.gz
 
-RUN tar -xvzf /tmp/plugin.tar.gz -C /kafka/connect
+RUN tar -xf /tmp/debezium-plugin.tar.gz -C $KAFKA_CONNECT_PLUGINS_DIR
