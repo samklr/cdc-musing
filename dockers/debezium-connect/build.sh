@@ -2,4 +2,4 @@
 
 echo "Building Connect Worker with Debezium set up "
 
-docker build -t dbz-connect-postgres .
+docker build -t kafka-connect .

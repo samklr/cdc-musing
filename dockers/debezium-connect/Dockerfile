@@ -1,13 +1,13 @@
-FROM debezium/connect-base:0.9
+FROM confluentinc/cp-kafka-connect:latest
+#FROM debezium/connect-base:0.9
 
 MAINTAINER samklr
 
-#KAFKA_CONNECT_PLUGINS_DIR=/kafka/connect \
+ENV DEBEZIUM_VERSION=0.9.5.Final \
+    KAFKA_CONNECT_PLUGINS_DIR=/usr/share/java
 
-ENV DEBEZIUM_VERSION=0.9.5 \
-    KAFKA_CONNECT_PLUGINS_DIR=/kafka/connect \
-    DBZ_URL=https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/0.9.5.Final/debezium-connector-postgres-0.9.5.Final-plugin.tar.gz
+RUN curl https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/$DEBEZIUM_VERSION/debezium-connector-postgres-$DEBEZIUM_VERSION-plugin.tar.gz -o /tmp/debezium-plugin-pg.tar.gz &&\
+    tar -xf /tmp/debezium-plugin-pg.tar.gz -C $KAFKA_CONNECT_PLUGINS_DIR
 
-RUN curl $DBZ_URL -o /tmp/debezium-plugin.tar.gz
-
-RUN tar -xf /tmp/debezium-plugin.tar.gz -C $KAFKA_CONNECT_PLUGINS_DIR/debezium
+RUN curl https://repo1.maven.org/maven2/io/debezium/debezium-connector-mysql/$DEBEZIUM_VERSION/debezium-connector-mysql-$DEBEZIUM_VERSION-plugin.tar.gz -o /tmp/debezium-plugin-mysql.tar.gz &&\
+    tar -xf /tmp/debezium-plugin-mysql.tar.gz -C $KAFKA_CONNECT_PLUGINS_DIR
