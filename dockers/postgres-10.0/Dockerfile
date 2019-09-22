@@ -1,9 +1,13 @@
 FROM postgres:10.0
 
-MAINTAINER Debezium Community
+MAINTAINER Debezium Community + Samklr
 ARG USE_POSTGIS=true
-ENV PLUGIN_VERSION=v0.10
-ENV WAL2JSON_COMMIT_ID=f68cb0096c669a2ee5a2d32b54a535513e3cb23b
+
+ENV PLUGIN_VERSION=v0.10.0.CR1
+ENV WAL2JSON_COMMIT_ID=92b33c7d7c2fccbeb9f79455dafbc92e87e00ddd
+
+#ENV PLUGIN_VERSION=v0.9
+#ENV WAL2JSON_COMMIT_ID=f68cb0096c669a2ee5a2d32b54a535513e3cb23b
 
 # Install the packages which will be required to get everything to compile
 RUN apt-get update \
