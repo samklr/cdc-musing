@@ -1,7 +1,6 @@
 #! /bin/bash
 
-export TOPIC="fakestore"
-export DEBEZIUM_VERSION=0.7.1
+export TOPIC="trips.nyc"
 
 docker-compose  exec schema-registry /usr/bin/kafka-avro-console-consumer \
     --bootstrap-server 35.190.207.217:9092 \

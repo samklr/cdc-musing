@@ -54,9 +54,8 @@ services:
       - KAFKA_REST_SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - KAFKA_REST_HOST_NAME=kafka-rest
 
-  connect1:
+  connect:
     image: samklr/sk-kafka-connect
-    container_name: dbz-connect-1
     restart: always
     ports:
      - 8083:8083
@@ -82,40 +81,8 @@ services:
       CONNECT_REST_PORT: 8083
       CONNECT_REST_ADVERTISED_HOST_NAME: "dbz-connect-1"
       CONNECT_PLUGIN_PATH: /usr/share/java
-      # CONNECT_JMX_PORT: 9991
-      # CONNECT_JMX_HOST: ${JMX_HOST_IP}
-
-  connect2:
-    image: samklr/sk-kafka-connect
-    container_name: dbz-connect-2
-    restart: always
-    ports:
-      - 8084:8083
-      - 9992:9992
-    links:
-      - kafka
-      - schema-registry
-    environment:
-      CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
-      CONNECT_GROUP_ID: "connect2"
-      CONNECT_PRODUCER_CLIENT_ID: "connect-worker-producer-2"
-      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
-      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
-      CONNECT_STATUS_STORAGE_TOPIC: connect-statuses
-      CONNECT_REPLICATION_FACTOR: 1
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
-      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_REST_PORT: 8083
-      CONNECT_REST_ADVERTISED_HOST_NAME: "dbz-connect-2"
-      CONNECT_PLUGIN_PATH: /usr/share/java
-#      CONNECT_JMX_PORT: 9992
-#      CONNECT_JMX_HOST: ${JMX_HOST_IP}
-
+      CONNECT_JMX_PORT: 9991
+      CONNECT_JMX_HOST: ${JMX_HOST_IP}
   postgres:
     image: debezium/postgres:10-alpine
     container_name: postgres
@@ -124,92 +91,91 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=debezium
-
-  kafka-connect-ui:
-    image: landoop/kafka-connect-ui
+#Monitoring
+  kafka-jmx-exporter:
+    build: ./kafka-jmx-exporter
     ports:
-      - 8000:8000
+      - 8080:8080
     links:
-      - connect1
-      - connect2
-      - kafka-rest
+      - kafka
     environment:
-      - CONNECT_URL=http://dbz-connect-1:8083,http://dbz-connect-2:8084
-      - PROXY=true
+      - JMX_PORT=9999
+      - JMX_HOST=${JMX_HOST_IP}
+      - HTTP_PORT=8080
+      - JMX_EXPORTER_CONFIG_FILE=kafka.yml
 
-  kafka-topic-ui:
-    image: landoop/kafka-topics-ui
+  connect-jmx-exporter:
+    build: ./connect-jmx-exporter
     ports:
-      - 8001:8000
+      - 8085:8085
     links:
-      - kafka-rest
+      - connect
     environment:
-      - KAFKA_REST_PROXY_URL=http://kafka-rest:8082
-      - PROXY=true
-
-  schema-registry-ui:
-    image: landoop/schema-registry-ui
+      - JMX_PORT=9991
+      - JMXPORT=9991
+      - JMX_HOST=${JMX_HOST_IP}
+      - JMXHOST=${JMX_HOST_IP}
+      - HTTP_PORT=8085
+      - JMX_EXPORTER_CONFIG_FILE=connect.yml
+  prometheus:
     ports:
-      - 8002:8000
+      - 9090:9090/tcp
+    image: prom/prometheus:0.18.0
+    volumes:
+      - ./mount/prometheus:/etc/prometheus
     links:
-      - schema-registry
-    environment:
-      - SCHEMAREGISTRY_URL=http://schema-registry:8081
-      - PROXY=true
+      - kafka-jmx-exporter
+      - connect-jmx-exporter
 
-##Monitoring
-  # kafka-jmx-exporter:
-  #   build: ./kafka-jmx-exporter
-  #   ports:
-  #     - 8080:8080
-  #   links:
-  #     - kafka
-  #   environment:
-  #     - JMX_PORT=9999
-  #     - JMX_HOST=${JMX_HOST_IP}
-  #     - HTTP_PORT=8080
-  #     - JMX_EXPORTER_CONFIG_FILE=kafka.yml
-  #
-  # connect-jmx-exporter:
-  #   build: ./connect-jmx-exporter
-  #   ports:
-  #     - 8085:8085
-  #   links:
-  #     - dbz-connect
-  #   environment:
-  #     - JMX_PORT=9991
-  #     - JMXPORT=9991
-  #     - JMX_HOST=${JMX_HOST_IP}
-  #     - JMXHOST=${JMX_HOST_IP}
-  #     - HTTP_PORT=8085
-  #     - JMX_EXPORTER_CONFIG_FILE=connect.yml
-  #
-  # prometheus:
-  #   ports:
-  #     - 9090:9090/tcp
-  #   image: prom/prometheus:0.18.0
-  #   volumes:
-  #     - ./mount/prometheus:/etc/prometheus
-  #   links:
-  #     - kafka-jmx-exporter
-  #     - connect-jmx-exporter
-  #
-  # grafana:
-  #   image: grafana/grafana:3.0.1
-  #   ports:
-  #     - 3000:3000/tcp
-  #   links:
-  #     - prometheus
-  #   volumes:
-  #     - "graf-db:/var/lib/grafana"
-  #
-  # graf-db:
-  #   command:
-  #     - cat
-  #   image: infinityworks/graf-db:08
-  #   links:
-  #     - prometheus
-  #   volumes:
-  #     - "graf-db:/var/lib/grafana/"
-# volumes:
-#   graf-db:
+  grafana:
+    image: grafana/grafana:3.0.1
+    ports:
+      - 3000:3000/tcp
+    links:
+      - prometheus
+    volumes:
+      - "graf-db:/var/lib/grafana"
+
+  graf-db:
+    command:
+      - cat
+    image: infinityworks/graf-db:08
+    links:
+      - prometheus
+    volumes:
+      - "graf-db:/var/lib/grafana/"
+volumes:
+  graf-db:
+    
+#
+# kafka-connect-ui:
+#   image: landoop/kafka-connect-ui
+#   ports:
+#     - 8000:8000
+#   links:
+#     - connect1
+#     - connect2
+#     - kafka-rest
+#   environment:
+#     - CONNECT_URL=http://dbz-connect-1:8083,http://dbz-connect-2:8084
+#     - PROXY=true
+#
+# kafka-topic-ui:
+#   image: landoop/kafka-topics-ui
+#   ports:
+#     - 8001:8000
+#   links:
+#     - kafka-rest
+#   environment:
+#     - KAFKA_REST_PROXY_URL=http://kafka-rest:8082
+#     - PROXY=true
+#
+# schema-registry-ui:
+#   image: landoop/schema-registry-ui
+#   ports:
+#     - 8002:8000
+#   links:
+#     - schema-registry
+#   environment:
+#     - SCHEMAREGISTRY_URL=http://schema-registry:8081
+#     - PROXY=true

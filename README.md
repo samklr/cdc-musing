@@ -2,12 +2,16 @@
 
 Experiment with Debezium and CDC on Kafka.
 
-In docker folder, Run
+In dockers folder, Run
 ''' docker-compose up -d'''
 
+If you would like to have prometheus and metrics exporter for Brokers and Connect Worker set up, you should set up the environment variable JMX_HOST_IP to your internet IP (JMX limitations for now with docker and prometheus-exporter).
+
+
 Wait for the platform to be built.
+You might want to change your debezium docker container to another container, as this is a custom build.
+
 You'll have a Confluent platform with 1Zk, 1 kafka broker, a container with Kafka connect
-Also some Ui from landoop.
 
 Wait until Connect is fully online at http://localhost:8083/connectors/
 
@@ -19,7 +23,7 @@ Once every thing is running, you'd need to register a connector to your db, into
 Edit the connectors config at  " /connectors/debezium-pg-\*.json"
 
 ''' ./register-connectors.json '''
-
+<!--
 Check UIs at
    http://localhost:8000 for Landoop Connect UI
    http://localhost:8001 for Landoop Kafka Topic UI
@@ -27,9 +31,7 @@ Check UIs at
    http://localhost:9090 for Prometheus to explore metrics
    http://localhost:3000 for Grafana to configure
 
-
-
-
+ -->
 
 TODO
  - Snapshot Monitoring
