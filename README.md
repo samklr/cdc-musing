@@ -11,7 +11,7 @@ If you would like to have prometheus and metrics exporter for Brokers and Connec
 Wait for the platform to be built.
 You might want to change your debezium docker container to another container, as this is a custom build.
 
-You'll have a Confluent platform with 1Zk, 1 kafka broker, a container with Kafka connect
+You'll have a Confluent platform with 1 Zk, 1 kafka broker, a container with Kafka connect
 
 Wait until Connect is fully online at http://localhost:8083/connectors/
 
@@ -26,13 +26,14 @@ Edit the connectors config at  " /connectors/debezium-pg-\*.json"
 <!--
 Check UIs at
    http://localhost:8001 for Landoop Kafka Topic UI
-   http://localhost:8000 for Landoop Confluent Schema registry UI
    http://localhost:9090 for Prometheus to explore metrics
    http://localhost:3000 for Grafana to configure
 
  -->
 
 TODO
+ - Configure Kafka Cluster with Security
  - Snapshot Monitoring
- - s3-sink
+ - S3-sink
  - Add Konducktor and other Kafka basic UIs
+ 
