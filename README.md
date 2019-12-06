@@ -1,6 +1,6 @@
 # cdc-fun
 
-Experiment with Debezium and CDC on Kafka.
+Experiments with Debezium and CDC on Kafka.
 
 In dockers folder, Run
 ''' docker-compose up -d'''
@@ -25,7 +25,6 @@ Edit the connectors config at  " /connectors/debezium-pg-\*.json"
 ''' ./register-connectors.json '''
 <!--
 Check UIs at
-   http://localhost:8000 for Landoop Connect UI
    http://localhost:8001 for Landoop Kafka Topic UI
    http://localhost:8000 for Landoop Confluent Schema registry UI
    http://localhost:9090 for Prometheus to explore metrics
@@ -36,3 +35,4 @@ Check UIs at
 TODO
  - Snapshot Monitoring
  - s3-sink
+ - Add Konducktor and other Kafka basic UIs
